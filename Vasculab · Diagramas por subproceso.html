@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vasculab · Diagramas por subproceso</title>
+<style>
+:root{--bg:#f6f9fb;--card:#fff;--ink:#16303f;--mut:#5b6b75;--ln:#cfdbe1;--navy:#123b56;--teal:#147d92;--pro:#3f6a8f;--org:#e8582d;--red:#d6372f;--amb:#e8962e;--vio:#7b4fb3;--wa:#22996a;--l1:#eaf2f6;--l2:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a22;--card:#16262f;--ink:#e6eef2;--mut:#9fb2bd;--ln:#2c4350;--navy:#1d5679;--pro:#4f7fae;--l1:#13232c;--l2:#0e1a22;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1a22;--card:#16262f;--ink:#e6eef2;--mut:#9fb2bd;--ln:#2c4350;--navy:#1d5679;--pro:#4f7fae;--l1:#13232c;--l2:#0e1a22;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1500px;margin:0 auto;padding:18px 16px 40px}
+h1{font-size:22px;margin:0 0 2px}h2{font-size:16px;margin:24px 0 8px}h3{font-size:14px;margin:0 0 8px}
+.sub{color:var(--mut);margin:0 0 10px;font-size:13px}
+.bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}.bar b{font-size:12px;color:var(--mut)}
+button{font:inherit;cursor:pointer}
+.ch{border:1px solid var(--ln);background:var(--card);color:var(--ink);border-radius:999px;padding:4px 12px;font-size:13px}
+.ch.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tb .ch{font-weight:700;padding:6px 14px}
+.lg{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:12px;color:var(--mut);background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:8px 12px}
+.lg span{display:inline-flex;align-items:center;gap:5px}
+.dot{width:16px;height:16px;border-radius:50%;color:#fff;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.wrap{overflow:auto;border:1px solid var(--ln);border-radius:10px;background:var(--bg);margin-top:10px;max-width:100%}
+svg{display:block}
+.sh{stroke:rgba(0,0,0,.28);stroke-width:1.2}
+.t-s .sh,.t-e .sh,.t-d .sh{fill:var(--org)}.t-p .sh{fill:var(--pro)}.t-b .sh{fill:var(--teal)}.t-w .sh{fill:var(--wa)}
+.t-b .ln{fill:none;stroke:rgba(255,255,255,.55)}
+.t-o .sh{fill:var(--card);stroke:var(--teal);stroke-width:1.8}
+.t-x .sh{fill:var(--card);stroke:var(--teal);stroke-width:1.8;stroke-dasharray:5 3}
+.tx{fill:#fff;font-weight:600}.t-o .tx,.t-x .tx{fill:var(--ink)}
+.n{cursor:pointer;outline:none}.n:hover .sh,.n:focus .sh{stroke:var(--amb);stroke-width:2.5}.n.sel .sh{stroke:var(--amb);stroke-width:3.5}
+.ic{font-size:13px}
+.e{fill:none;stroke:var(--ink);stroke-width:1.6}.ed{stroke:var(--mut);stroke-dasharray:2 4}.ex{stroke:var(--mut);stroke-dasharray:6 4}
+.el{font-size:10px;font-weight:700;fill:var(--ink);paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round}
+.bd circle{stroke:var(--bg);stroke-width:1.5}.bd text{fill:#fff;font-size:10px;font-weight:700}
+.bf circle{fill:var(--red)}.br circle{fill:var(--amb)}.bc circle{fill:var(--teal)}.bv circle{fill:var(--vio)}
+.k-f .n:not([data-f*="f"]),.k-r .n:not([data-f*="r"]),.k-c .n:not([data-f*="c"]),.k-v .n:not([data-f*="v"]){opacity:.15}
+.pn{position:sticky;bottom:8px;margin-top:10px;background:var(--card);border:1px solid var(--ln);border-left:5px solid var(--org);border-radius:10px;padding:10px 14px;box-shadow:0 4px 18px rgba(0,0,0,.12);min-height:64px}
+.pn h3{margin:0 0 2px;font-size:15px}.pn .m{font-size:12px;color:var(--mut);margin-bottom:4px}.pn p{margin:0;font-size:14px}
+.pill{display:inline-block;font-size:11px;border:1px solid var(--ln);border-radius:999px;padding:1px 8px;margin:6px 4px 0 0;color:var(--mut)}
+.pill.f{border-color:var(--red);color:var(--red)}.pill.r{border-color:var(--amb);color:var(--amb)}.pill.c{border-color:var(--teal);color:var(--teal)}.pill.v{border-color:var(--vio);color:var(--vio)}
+.gr{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.cd{background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:12px}
+.it{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--ln);padding:7px 2px;color:var(--ink)}
+.it:first-of-type{border-top:0}.it b{display:block;font-size:13px}.it span{display:block;font-size:12px;color:var(--mut)}.it i{font-size:11px;color:var(--teal);font-style:normal}
+.it:hover b{text-decoration:underline}
+</style></head><body><main>
+<h1>Diagramas por subproceso</h1>
+<p class="sub">Detalle de cada subproceso, incluidas las variantes y excepciones que el mapa general dejó fuera · Basado en los documentos funcionales 1 a 4 (v0.1) · Lo marcado como “por validar” no es una regla confirmada.</p>
+<div class="bar tb" id="tb"></div>
+<p class="sub" id="cv"></p>
+<div class="bar" id="fl"><b>Resaltar:</b></div>
+<div class="lg" id="lg"></div>
+<div class="bar"><b>Zoom:</b><button class="ch" id="zo">−</button><button class="ch" id="zi">+</button><button class="ch" id="zf">Ajustar al ancho</button><span class="sub" style="margin:0 0 0 8px">Toca un paso para ver el detalle.</span></div>
+<div class="wrap" id="wr"><svg id="sv" role="img" aria-label="Diagrama de flujo del subproceso"></svg></div>
+<div class="pn" id="pn"></div>
+<h2>Lo que revela este diagrama</h2>
+<div class="gr" id="ins"></div>
+</main>
+<script>
+const CW=134,LH=100,LB=124,TOP=14;
+const D={s:[112,40],e:[112,40],p:[114,52],d:[126,78],b:[100,64],o:[114,58],w:[114,54],x:[116,50]};
+const IC={b:"🗄️",o:"🧾",x:"🌐",w:"💬"};
+// nodo: id, carril, columna, tipo(s inicio,e fin,p actividad,d decisión,b base de datos,o documento,w WhatsApp,x externo), texto, banderas(f falla,r redundancia,c control,v por validar), sistemas, hallazgos, detalle
+// arista: origen, destino, etiqueta, estilo(m flujo,d datos,x consulta), modo(v,B,U,D), bidireccional
+const DG={
+s1:{n:"1 · WhatsApp",cv:"Además del examen: reprogramación, información y resultados, terapias, consulta particular, corrección de órdenes y revisión clínica.",
+L:["Paciente","Secretaría · revisión","Secretaría · agenda","Secretaría · reprogramación","Secretaría · información y resultados","Enfermería","Medifolios","SURA · Drive"],
+R:[
+["a1",0,0,"s","Paciente escribe por WhatsApp","","WhatsApp","","Pide examen, terapias, consulta, reprogramación, información o resultados."],
+["a2",1,0,"w","Identifica la necesidad y etiqueta el chat","f","WhatsApp compartido","S1-H1, S1-H4","Tres personas comparten el chat; se reportan 200–300 chats acumulados y pacientes que van en persona."],
+["a3",1,1,"d","¿Qué solicita?","c","WhatsApp","S1-H4","Define la ruta del chat. Etiquetas: pendiente, listo para agendar, seguimiento, cambio de orden…"],
+["rp1",3,2,"p","Reprogramación: ubica la cita actual","","Medifolios","","Revisa la conversación y consulta fecha, hora y profesional en Medifolios."],
+["ot1",4,2,"p","Información o resultado: respuesta guardada o búsqueda","","WhatsApp","","Costos, convenios, sedes o resultados: usa respuestas predefinidas o busca el archivo."],
+["b1",1,3,"p","Revisa orden, historia y autorización","cr","WhatsApp, portal SURA","S1-H3, S1-H5","Vigencia, historia legible y pertinente, servicios autorizados y sesiones. La orden se revisa de nuevo al agendar."],
+["rp2",3,3,"p","Ofrece opciones, confirma y cambia la cita","v","Medifolios","S1 §9.4","Puede quedar en amarillo en la agenda. Por validar: liberar el cupo, exigir confirmación y falta de respuesta."],
+["ot2",4,3,"e","Respuesta o resultado enviado","","Correo, WhatsApp","","Si va por correo se confirma la dirección; si va a recepción, se imprime."],
+["drv",7,3,"b","Resultados: Medifolios · Drive","f","Drive","S1 §9.6, S3-H10","La transcriptora lo guarda en Drive y debe subirlo al sistema; no siempre está en Medifolios."],
+["b2",1,4,"d","¿Documentos completos y vigentes?","c","","S1-H3","Si falta algo, está vencida o mal autorizada, el chat queda pendiente."],
+["a5",0,4,"p","Paciente corrige o envía el documento","v","WhatsApp, correo","S1-H7","Orden mal autorizada: correo a contactos de SURA o el paciente la gestiona. Criterio por validar."],
+["a4",7,4,"x","Portal SURA: autorización","","Portal SURA","S1-H7","Consulta de autorización, vigencia y cantidad de terapias."],
+["b3",1,5,"p","Registra o actualiza al paciente y carga la historia","fr","Medifolios","S1-H2","Copia manual desde WhatsApp; el primer teléfono recibe las confirmaciones."],
+["db1",6,5,"b","Pacientes e historia clínica","","Medifolios","","La historia se carga en documentos del paciente; las órdenes no (por validar)."],
+["a6",5,6,"p","Enfermería revisa casos dudosos","c","","S1-H5","Revisa si la historia respalda el examen. No se sustituye con automatización."],
+["d3",2,6,"d","¿Terapias?","","","","Define si se programan sesiones o un examen o consulta."],
+["tv",2,7,"p","Terapias: programa las sesiones autorizadas","v","Medifolios","S1-H6","Dos por semana con descanso (no es regla universal); pregunta movilidad, úlceras y sede."],
+["m1",2,8,"p","Examen o consulta: elige agenda y crea la cita","r","Medifolios","S1-H5, S1-H6","Servicio, profesional, sede y duración. Consulta particular: verifica tipo de atención. Reglas sin catálogo."],
+["m2",2,9,"w","Confirma por WhatsApp e indica preparación","","WhatsApp","","Envía fecha, dirección y preparación. El estado del chat no es el estado de la cita."],
+["rec",6,9,"w","Recordatorio automático de Medifolios","v","Paquete WhatsApp","","Línea automática sin atención humana. Por validar botones y estados."],
+["e1",2,10,"e","Chat gestionado","","WhatsApp","","Marcarlo como gestionado lo retira de pendientes sin borrar la conversación."]],
+E:[["a1","a2"],["a2","a3"],["a3","b1","Cita, examen o terapia"],["a3","rp1","Reprogramación","m","v"],["a3","ot1","Información o resultado","m","v"],["rp1","rp2"],["ot1","ot2"],["ot1","drv","","d"],["b1","b2"],["b2","b3","Sí"],["b2","a5","No","m","","bi"],["b2","a4","","x"],["b2","a6","duda clínica","x","v"],["b3","db1","","d"],["b3","d3"],["d3","tv","Sí"],["d3","m1","No","m","D"],["tv","m2","","m","U"],["m1","m2"],["rp2","m2"],["m2","rec","","d"],["m2","e1"]]},
+s2:{n:"2 · Admisiones",cv:"Además del examen: terapias, inasistencia, transferencias, cierre de caja y control de órdenes físicas.",
+L:["Paciente","Recepción","Facturación","Equipo asistencial","Medifolios","SURA · WhatsApp interno"],
+R:[
+["p1",0,0,"s","Paciente llega con cédula, orden e historia","","","","Si no trae la orden, se consulta e imprime desde SURA cuando el acceso lo permite."],
+["r1",1,0,"p","Ubica la cita y marca al paciente en espera","v","Medifolios","","La agenda usa colores (azul atendido, rosado en espera…). Validar en pantalla."],
+["ina",4,0,"e","Cita incumplida: el cupo se pierde","f","Medifolios","S2 §12","Cita confirmada que no se atiende ni se cancela. Regla reportada, no política verificada."],
+["tp",0,1,"p","Terapias: firma el listado de asistencia","","Papel","S4-H11","Se firma en cada sesión y es soporte de cobro de las terapias."],
+["r2",1,1,"p","Revisa la orden física y la compara con SURA","r","Medifolios, portal SURA","S2-H1","Imprime y pide firma y cédula. Es la tercera revisión de la misma orden."],
+["s1",5,1,"x","Portal SURA: orden y fecha de atención","","Portal SURA","S4-H08","Orden, vigencia, servicios autorizados y fecha de atención."],
+["r3",1,2,"d","¿Documentos y autorización en orden?","cv","","S2 §6","Si falta algo no pasa a admisión. No hay criterio formal para pacientes particulares."],
+["pa",0,2,"p","Paciente aporta lo que falta o se reprograma","","","","Quien agendó pudo ser un familiar: los datos pueden venir mal."],
+["r4",1,3,"p","Confirma y corrige los datos del paciente","r","Medifolios","S2-H7","Segunda verificación: documento, correo, teléfono y régimen."],
+["r5",1,4,"p","Crea una admisión por cada examen","f","Medifolios","S2-H2, S2-H3","En horas pico quedan admisiones iniciadas sin terminar y no hay lista de pendientes."],
+["db2",4,4,"b","Medifolios: admisiones y consumos","","Medifolios","","Sin admisión, el resultado no puede cargarse (subproceso 3)."],
+["r6",1,5,"p","Registra consumo: tipo RIPS, profesional, diagnóstico","frv","Medifolios","S2-H8, S4-H01","El orden respecto del copago está por validar. Aquí nacen consumos dobles y campos vacíos."],
+["r7",1,6,"d","¿Tiene copago?","","","","Sin copago: solo admisión y consumo. Con copago: además factura o pago."],
+["r8",1,7,"p","Cobra copago y registra factura o pago","fv","Medifolios","S2-H4","Incluye autorización y régimen. Medifolios podría crear el consumo solo (ver S4)."],
+["tr",5,8,"w","Captura de la transferencia en grupo de WhatsApp","f","WhatsApp interno","S2-H4","Se anota nombre y documento del paciente para facilitar la validación."],
+["fa",2,8,"p","Facturación confirma el ingreso del pago","c","","S2 §10.1","Control financiero: el comprobante no basta y no debe eliminarse."],
+["cl1",1,9,"p","Cierre de caja: reporte vs. órdenes y copagos","fr","Medifolios, Excel","S2-H5, S2-H6, S2-H9","Usa colores propios. El reporte solo muestra pacientes con copago."],
+["cl2",1,10,"d","¿Faltan órdenes físicas?","c","","S2-H5","El cierre depende de recibir todas las órdenes físicas."],
+["cl3",3,10,"p","Equipo asistencial entrega las órdenes pendientes","f","","S2-H5","Se espera y controla; no hay registro formal de órdenes esperadas."],
+["cl4",1,11,"p","Cuenta, organiza y registra las órdenes; guarda el efectivo","","","","Registra fecha y cantidad y las agrupa."],
+["fa2",2,12,"p","Facturación recoge las órdenes físicas","","","","Recoge la documentación física para facturar."],
+["e1",2,13,"e","Soportes listos para facturación (S4)","","","","Continúa en el subproceso 4."]],
+E:[["p1","r1"],["r1","ina","no asiste","m","v"],["r1","tp","terapia"],["r1","r2"],["r2","s1","","x"],["r2","r3"],["r3","pa","No","m","","bi"],["r3","r4","Sí"],["r4","r5"],["r5","db2","","d"],["r5","r6"],["r6","db2","","d","B"],["r6","r7"],["r7","r8","Sí"],["r7","cl1","No","m","D"],["r8","tr","transferencia","x"],["tr","fa","","x"],["r8","cl1"],["fa","cl1"],["cl1","cl2"],["cl2","cl3","Sí","m","","bi"],["cl2","cl4","No"],["cl4","fa2"],["fa2","e1"]]},
+s3:{n:"3 · Transcripción",cv:"Además del flujo habitual: pletismografía por correo, revisión de la doctora, orden vencida, límite de fotos y resultado no localizado.",
+L:["Enfermería","Transcriptora","Transcriptora · pletismografía","Doctora vascular","Medifolios","Drive · correo","Paciente"],
+R:[
+["n1",0,0,"s","Examen realizado: mapa físico y fotos","","Mapa, USB","S3-H03","Enfermería diligencia el mapa en papel; las fotos salen por USB."],
+["d0",1,1,"d","¿Pletismografía?","","","S3-H09","Este examen sigue una ruta distinta al flujo habitual."],
+["pa1",0,2,"p","Enfermería envía el reporte PDF por correo","","Equipo, correo","","El reporte se genera desde el equipo, normalmente en PDF."],
+["t1",1,2,"p","Completa plantilla Word y transcribe el mapa","","Word","S3-H02, S3-H07","Código diagnóstico de la orden o, si falta y es de SURA, del portal. El criterio para otros casos está por validar."],
+["pa2",2,3,"p","Descarga el PDF y arma el correo","","Correo","","Incluye datos del paciente, dirección, mensaje y firma."],
+["t2",1,3,"p","Agrega firma, mapa escaneado, fotos y orden","r","Escáner, USB","S3-H03, S3-H04","Nombres de archivo del mapa sin norma; fotos organizadas a mano; orden de SURA escaneada."],
+["pa3",5,4,"x","Correo al paciente; nota en la cita y copia a Drive","f","Correo, Drive","S3-H09","No queda adjunto en Medifolios y algunos pacientes dicen no recibirlo."],
+["e2",6,4,"e","Paciente recibe el PDF por correo","","Correo","","Fin de la ruta alterna."],
+["rv1",0,4,"d","¿Enfermería aprueba?","c","","S3","Revisa y pide correcciones. Control clínico obligatorio."],
+["ex1",1,5,"p","Orden vencida o distinta al examen","v","","S3 §7","Gestión administrativa posterior; criterio por validar con dirección y facturación."],
+["d2",3,5,"d","¿Requiere revisión de la doctora?","c","","S3","Algunos exámenes esperan su validación antes del envío."],
+["dr",3,6,"p","Doctora revisa y aprueba","v","","S3-H08","Cómo queda la evidencia de su aprobación está por validar."],
+["p1",1,7,"p","Copia el resultado a Medifolios y recarga adjuntos","fr","Medifolios","S3-H01, S3-H06","Mapa y fotos se cargan dos veces. Límite reportado de 20 fotos."],
+["p2",1,8,"p","Revisa la presentación y envía al correo","f","Medifolios, correo","S3-H01","Flujo habitual sin PDF adjunto desde el formato de resultados. Deja nota en la cita."],
+["db",4,9,"b","Medifolios: historia y formato de resultados","","Medifolios","","Allí queda el resultado publicado."],
+["dr1",5,9,"b","Drive: PDF de respaldo","f","Drive","S3-H10","Sin política clara de retención y permisos; se elimina la copia local."],
+["nl",5,10,"p","Resultado no localizado: busca en Drive, Medifolios y soportes","f","","S3 §7","Incidente sin protocolo definido."],
+["e1",6,8,"e","Paciente recibe el resultado por correo","","Correo","","Fin del flujo habitual."]],
+E:[["n1","d0"],["d0","t1","No"],["d0","pa1","Sí"],["pa1","pa2"],["pa2","pa3"],["pa3","e2"],["t1","t2"],["t2","rv1"],["rv1","t2","No: corrige","m","B"],["t2","ex1","orden","x"],["rv1","d2","Sí"],["d2","dr","Sí"],["d2","p1","No","m","D"],["dr","p1"],["p1","p2"],["p2","db","","d"],["p2","dr1","","d"],["p2","e1"],["dr1","nl","si no aparece","x"]]},
+s4:{n:"4 · Facturación",cv:"Además de exámenes con SURA: terapias, Clínica Medellín y otros pagadores, y el detalle de ajuste de RIPS.",
+L:["Facturación · exámenes SURA","Drive · escáner","Facturación · terapias SURA","Facturación · Clínica Medellín y otros","Medifolios","Aplicación del Ministerio","Portal SURA"],
+R:[
+["s0",0,0,"s","Llegan autorizaciones firmadas","","Papel","S4-H14","Las autorizaciones físicas se guardan 15 años."],
+["d0",0,1,"d","¿Pagador y tipo de servicio?","c","","S4-H12","Cambian soportes, radicación y RIPS según pagador y servicio."],
+["ex1",0,2,"p","Verifica fecha de atención y arma paquetes de 20","r","Portal SURA","S4-H08","Si falta la fecha en SURA, la orden puede anularse."],
+["tp1",2,2,"p","Terapias: registra copago por sesión","fv","Medifolios","S4-H11","Factura al cierre: terapias completas, orden vencida o paciente que no vuelve. Sin proceso formal."],
+["cm1",3,2,"p","Una factura por paciente","","Medifolios","S4-H12","Se elige la lista de precios de la entidad a la que pertenece el paciente."],
+["f1",0,3,"p","Crea la factura y carga consumos por paciente","","Medifolios","","Factura electrónica de venta, caja general, tercero SURA, forma de pago crédito."],
+["tp2",2,3,"p","Factura de 10 órdenes (10 pacientes)","","Medifolios","","Selecciona las sesiones asistidas según el listado firmado; el copago aparece por sesión."],
+["cm2",3,3,"p","Tarifa convenida y autorización de la orden","","Medifolios","","Número de autorización tomado de la orden física."],
+["k1",0,4,"d","¿Consumo doble o código errado?","f","Medifolios","S4-H01, S4-H03, S4-H05","También tarifa según fecha de la autorización y datos del paciente."],
+["kc",4,4,"p","Corrige consumo o datos del paciente","r","Medifolios","S4-H13","Al corregir con copago, la línea desaparece y hay que agregarla de nuevo."],
+["so1",0,5,"p","Arma soportes: autorización + resultado (ZIP)","fr","Foxit, escáner","S4-H06, S4-H07","PDF por paciente en el orden de la factura, nombrado NIT_serie_número; SURA exige ZIP."],
+["dr",1,5,"b","Drive: resultados por cédula","f","Drive","S4-H06","Se descargan uno a uno y se reescanean autorizaciones faltantes o ilegibles."],
+["tp3",2,5,"p","Escanea orden y listado firmado","","Escáner","S4-H11","No hay resultado que descargar en terapias."],
+["cm3",3,5,"e","Dos copias: orden y clínica; sin plataforma","","Papel, correo","S4-H12","Hospitalizados: sin soportes; el resultado se envía al piso."],
+["g1",4,6,"p","Genera soportes de cobro: factura, XML y RIPS","","Medifolios","","Se descarga un ZIP en formato del Ministerio de Salud."],
+["aj",0,7,"p","Ajusta el JSON de RIPS a mano","fr","Excel personal","S4-H04, S4-H15","NIT, tipo de usuario, código de servicio, finalidad, profesional, diagnóstico y valor. Si falta el profesional se asigna otro: revisar."],
+["va",5,8,"d","¿Validador sin errores?","cf","App del Ministerio","S4-H10","Lenta; con errores se reajusta. Al aprobar queda solo el JSON y el archivo CUV."],
+["ra",6,9,"x","Radica factura, soportes y RIPS","f","Portal SURA","S4-H09","Tres cargas con nomenclatura estricta, por lotes y sin control del plazo. Prepagadas usan otros soportes."],
+["fin",0,10,"e","Confirmación por correo y archivo","","Correo","","Se guardan carpetas por mes y los físicos."]],
+E:[["s0","d0"],["d0","ex1","Exámenes SURA"],["d0","tp1","Terapias SURA","m","v"],["d0","cm1","Clínica Medellín u otros","m","v"],["ex1","f1"],["f1","k1"],["k1","so1","No"],["k1","kc","Sí"],["kc","so1"],["so1","dr","resultados","d"],["so1","g1"],["tp1","tp2"],["tp2","tp3"],["tp3","g1"],["cm1","cm2"],["cm2","cm3"],["g1","aj"],["aj","va"],["va","aj","No: reajusta","m","B"],["va","ra","Sí"],["ra","fin"]]}};
+const $=s=>document.querySelector(s);
+function wrap(s,n){const o=[];let c="";for(const w of s.split(" ")){if((c+" "+w).trim().length>n&&c){o.push(c);c=w}else c=(c+" "+w).trim()}o.push(c);return o}
+function shp(t,w,h){const x=-w/2,y=-h/2;
+ if(t=="d")return`<polygon class="sh" points="0,${y} ${w/2},0 0,${h/2} ${-w/2},0"/>`;
+ if(t=="b")return`<path class="sh" d="M${x},${y+9}a${w/2},9 0 0 1 ${w},0v${h-18}a${w/2},9 0 0 1 ${-w},0z"/><path class="ln" d="M${x},${y+9}a${w/2},9 0 0 0 ${w},0"/>`;
+ if(t=="o")return`<path class="sh" d="M${x},${y}h${w}v${h-8}q${-w/4},14 ${-w/2},0t${-w/2},0z"/>`;
+ if(t=="w")return`<rect class="sh" x="${x}" y="${y}" width="${w}" height="${h}" rx="14"/><path class="sh" d="M${x+10},${h/2}l-2,9l14,-9z"/>`;
+ return`<rect class="sh" x="${x}" y="${y}" width="${w}" height="${h}" rx="${t=="s"||t=="e"?h/2:t=="x"?5:8}"/>`}
+const A=(n,s)=>{const[w,h]=D[n.t];return{r:[n.x+w/2,n.y],l:[n.x-w/2,n.y],t:[n.x,n.y-h/2],b:[n.x,n.y+h/2]}[s]};
+function route(a,b,m){
+ if(m=="U"){const y=Math.min(A(a,"t")[1],A(b,"t")[1])-20;return[A(a,"t"),[a.x,y],[b.x,y],A(b,"t")]}
+ if(m=="D"){const y=Math.max(A(a,"b")[1],A(b,"b")[1])+10;return[A(a,"b"),[a.x,y],[b.x,y],A(b,"b")]}
+ if(m=="B")return[A(a,b.y<a.y?"t":"b"),[a.x,b.y],A(b,"r")];
+ if(a.x==b.x){const d=b.y>a.y;return[A(a,d?"b":"t"),A(b,d?"t":"b")]}
+ if(a.y==b.y)return[A(a,"r"),A(b,"l")];
+ if(m=="v")return[A(a,b.y>a.y?"b":"t"),[a.x,b.y],A(b,"l")];
+ const p=A(a,"r"),q=A(b,"l"),x=q[0]-14;return[p,[x,p[1]],[x,q[1]],q]}
+const BD={f:["bf","!"],r:["br","↻"],c:["bc","✓"],v:["bv","?"]};
+const TG={f:"Falla o riesgo",r:"Redundancia",c:"Control crítico",v:"Por validar"};
+let cur,N,W,H,sc=innerWidth<700?.55:.8;
+const sv=$("#sv"),wr=$("#wr");
+function draw(k){cur=DG[k];const lanes=cur.L;
+ N=cur.R.map((r,i)=>({i,id:r[0],l:r[1],c:r[2],t:r[3],lb:r[4],f:r[5],sy:r[6],h:r[7],d:r[8],x:LB+CW*(r[2]+.5),y:TOP+LH*(r[1]+.5)}));
+ const M={};N.forEach(n=>M[n.id]=n);
+ W=LB+CW*(Math.max(...N.map(n=>n.c))+1)+10;H=TOP+LH*lanes.length+8;
+ let s=`<defs><marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--ink)"/></marker><marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--mut)"/></marker></defs>`;
+ lanes.forEach((_,i)=>{s+=`<rect x="0" y="${TOP+LH*i}" width="${W}" height="${LH}" fill="${i%2?"var(--l2)":"var(--l1)"}" stroke="var(--ln)" stroke-width=".6"/>`});
+ cur.E.forEach(([a,b,lb,st,m,bi])=>{const p=route(M[a],M[b],m),g=st=="d"||st=="x";
+  s+=`<path class="e e${st||"m"}" d="M${p.map(q=>q.join(",")).join("L")}" marker-end="url(#${g?"mg":"ma"})"${bi?' marker-start="url(#ma)"':""}/>`;
+  if(lb){const[p0,p1]=p,len=Math.hypot(p1[0]-p0[0],p1[1]-p0[1]),lx=len>=44?(p0[0]+p1[0])/2:p1[0]+14,ly=len>=44?(p0[1]+p1[1])/2-5:p1[1]-5;s+=`<text class="el" x="${lx}" y="${ly}" text-anchor="middle">${lb}</text>`}});
+ N.forEach(n=>{const[w,h]=D[n.t],L=wrap(n.lb,n.t=="d"?14:17),fs=n.t=="d"?9.4:10.4;
+  s+=`<g class="n t-${n.t}" data-i="${n.i}" data-f="${n.f}" transform="translate(${n.x},${n.y})" tabindex="0" role="button" aria-label="${n.lb}">${shp(n.t,w,h)}<text class="tx" text-anchor="middle" style="font-size:${fs}px">${L.map((t,i)=>`<tspan x="0" y="${(i-(L.length-1)/2)*12+4+(n.t=="b"?3:0)}">${t}</tspan>`).join("")}</text>${IC[n.t]?`<text class="ic" x="${-w/2-4}" y="${-h/2+9}">${IC[n.t]}</text>`:""}${n.f.split("").map((q,j)=>`<g class="bd ${BD[q][0]}" transform="translate(${w/2-6-j*17},${-h/2-1})"><circle r="7.5"/><text y="3.6" text-anchor="middle">${BD[q][1]}</text></g>`).join("")}</g>`});
+ s+=`<g id="lab">${lanes.map((l,i)=>{const L=wrap(l,15);return`<rect x="0" y="${TOP+LH*i+1}" width="${LB-6}" height="${LH-2}" rx="6" fill="var(--navy)"/><text fill="#fff" font-size="11" font-weight="700" text-anchor="middle">${L.map((t,j)=>`<tspan x="${(LB-6)/2}" y="${TOP+LH*i+LH/2+(j-(L.length-1)/2)*13+4}">${t}</tspan>`).join("")}</text>`}).join("")}</g>`;
+ sv.setAttribute("viewBox",`0 0 ${W} ${H}`);sv.setAttribute("class","");sv.innerHTML=s;sync();wr.scrollLeft=0;
+ $("#cv").textContent="Cubre: "+cur.cv;
+ $("#pn").innerHTML="<h3>Selecciona un paso</h3><p>Aquí verás quién lo hace, con qué sistema, qué falla o se repite y a qué hallazgo corresponde.</p>";
+ document.querySelectorAll("#fl .ch").forEach((b,i)=>{b.classList.toggle("on",i==0);const q=b.dataset.k;if(q&&q!="a")b.textContent=b.dataset.t+" ("+N.filter(n=>n.f.includes(q)).length+")"});
+ $("#ins").innerHTML="";
+ [["f","Fallas y riesgos"],["r","Redundancias"],["c","Controles que no deben eliminarse"],["v","Por validar con la clínica"]].forEach(([q,t])=>{const li=N.filter(n=>n.f.includes(q));if(!li.length)return;const c=document.createElement("div");c.className="cd";c.innerHTML=`<h3>${t} (${li.length})</h3>`+li.map(n=>`<button class="it" data-i="${n.i}"><b>${n.lb}</b><span>${n.d}</span><i>${n.h||""}</i></button>`).join("");c.addEventListener("click",e=>{const b=e.target.closest(".it");if(b){show(+b.dataset.i,1);wr.scrollIntoView({behavior:"smooth",block:"start"})}});$("#ins").append(c)})}
+function sync(){sv.setAttribute("width",W*sc);sv.setAttribute("height",H*sc);const l=$("#lab");if(l)l.setAttribute("transform",`translate(${wr.scrollLeft/sc},0)`)}
+function zoom(k){sc=Math.max(.3,Math.min(1.6,k));sync()}
+wr.addEventListener("scroll",sync);$("#zi").onclick=()=>zoom(sc+.1);$("#zo").onclick=()=>zoom(sc-.1);$("#zf").onclick=()=>zoom((wr.clientWidth-2)/W);
+function show(i,go){const n=N[i];document.querySelectorAll(".n.sel").forEach(x=>x.classList.remove("sel"));sv.querySelector(`.n[data-i="${i}"]`).classList.add("sel");
+ $("#pn").innerHTML=`<h3>${n.lb}</h3><div class="m">${cur.L[n.l]}${n.sy?" · "+n.sy:""}</div><p>${n.d}</p>${n.f.split("").filter(Boolean).map(k=>`<span class="pill ${k}">${TG[k]}</span>`).join("")}${n.h?n.h.split(", ").map(h=>`<span class="pill">${h}</span>`).join(""):""}`;
+ if(go)wr.scrollTo({left:n.x*sc-wr.clientWidth/2,behavior:"smooth"})}
+sv.addEventListener("click",e=>{const g=e.target.closest(".n");if(g)show(+g.dataset.i)});
+sv.addEventListener("keydown",e=>{if(e.key=="Enter"){const g=e.target.closest(".n");if(g)show(+g.dataset.i)}});
+Object.keys(DG).forEach((k,i)=>{const b=document.createElement("button");b.className="ch"+(i?"":" on");b.textContent="Subproceso "+DG[k].n;b.onclick=()=>{document.querySelectorAll("#tb .ch").forEach(x=>x.classList.remove("on"));b.classList.add("on");draw(k)};$("#tb").append(b)});
+[["a","Todo"],["f","Fallas"],["r","Redundancias"],["c","Controles críticos"],["v","Por validar"]].forEach(([k,t])=>{const b=document.createElement("button");b.className="ch";b.dataset.k=k;b.dataset.t=t;b.textContent=t;b.onclick=()=>{document.querySelectorAll("#fl .ch").forEach(x=>x.classList.remove("on"));b.classList.add("on");sv.setAttribute("class","k-"+k)};$("#fl").append(b)});
+const lg=[["s","Inicio / fin"],["p","Actividad"],["d","Decisión"],["b","Base de datos"],["o","Documento"],["w","WhatsApp"],["x","Sistema externo"]];
+$("#lg").innerHTML=lg.map(([t,l])=>`<span><svg viewBox="-30 -18 60 36" width="40" height="24"><g class="t-${t}">${shp(t,D[t][0]*.42,D[t][1]*.42)}</g></svg>${l}</span>`).join("")+
+ `<span><i class="dot" style="background:var(--red)">!</i>Falla</span><span><i class="dot" style="background:var(--amb)">↻</i>Redundancia</span><span><i class="dot" style="background:var(--teal)">✓</i>Control crítico</span><span><i class="dot" style="background:var(--vio)">?</i>Por validar</span>`+
+ `<span><svg width="36" height="10"><line x1="0" x2="34" y1="5" y2="5" stroke="var(--ink)" stroke-width="2"/></svg>Flujo</span><span><svg width="36" height="10"><line x1="0" x2="34" y1="5" y2="5" stroke="var(--mut)" stroke-width="2" stroke-dasharray="6 4"/></svg>Consulta</span><span><svg width="36" height="10"><line x1="0" x2="34" y1="5" y2="5" stroke="var(--mut)" stroke-width="2" stroke-dasharray="2 4"/></svg>Datos</span>`;
+draw("s1");
+</script></body></html>
